@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+  />
+
+  <title>River Basin Dashboard</title>
+
+  <!-- Leaflet CSS -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  />
+
+  <!-- Dashboard CSS -->
+  <link
+    rel="stylesheet"
+    href="design.css"
+  />
+</head>
+
+<body>
+
+  <!-- ======================================================
+       TOP BAR
+  ======================================================= -->
+
+  <header class="topbar">
+
+    <div class="brand">
+      River Basin Dashboard
+    </div>
+
+    <div class="nav">
+
+      <button
+        class="tabBtn active"
+        id="btnIrrawaddy"
+        type="button"
+      >
+        Irrawaddy
+      </button>
+
+      <button
+        class="tabBtn"
+        id="btnMekong"
+        type="button"
+      >
+        Mekong
+      </button>
+
+    </div>
+
+    <div
+      class="rightNote"
+      id="basinLabel"
+    >
+      Irrawaddy Basin
+    </div>
+
+  </header>
+
+
+  <!-- ======================================================
+       MAIN LAYOUT
+  ======================================================= -->
+
+  <div class="mainLayout">
+
+
+    <!-- ====================================================
+         LEFT SIDEBAR
+    ===================================================== -->
+
+    <aside class="panel">
+
+      <h2 id="panelTitle">
+        Click a station 📍
+      </h2>
+
+      <p
+        class="muted"
+        id="panelSubtitle"
+      >
+        Hover or click a station to see details.
+      </p>
+
+
+      <!-- ==================================================
+           MAP GUIDE
+      =================================================== -->
+
+      <div class="card">
+
+        <h3 class="cardTitle">
+          Map guide
+        </h3>
+
+
+        <div class="legendRow">
+
+          <span class="legendStation">
+            📍
+          </span>
+
+          <span>
+            Station
+          </span>
+
+        </div>
+
+
+        <div class="legendRow">
+
+          <img
+            src="damicon.png"
+            alt="Dam icon"
+            class="legendDamImage"
+          />
+
+          <span>
+            Dam
+          </span>
+
+        </div>
+
+
+        <div style="margin-top:10px;">
+
+          <button
+            class="chartBtn"
+            id="toggleDamsBtn"
+            type="button"
+          >
+            Hide dams
+          </button>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           STATION SECTIONS
+      =================================================== -->
+
+      <div id="stationSections">
+
+
+        <!-- ==================================================
+             STATION INFORMATION
+        =================================================== -->
+
+        <div class="card">
+
+          <div class="stationHeaderBlock">
+
+            <div
+              class="stationNameText"
+              id="stationNameText"
+            >
+              —
+            </div>
+
+            <div class="stationSubText">
+              Monitoring station
+            </div>
+
+          </div>
+
+
+          <div class="stationCardGrid">
+
+
+            <!-- River -->
+
+            <div class="stationStat">
+
+              <div class="stationStatLabel">
+                River
+              </div>
+
+              <div
+                class="stationStatValue"
+                id="river"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Precipitation -->
+
+            <div class="stationStat">
+
+              <div class="stationStatLabel">
+                Avg annual precip
+              </div>
+
+              <div
+                class="stationStatValue"
+                id="climate"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             TREND
+        =================================================== -->
+
+        <div class="card">
+
+          <h3 id="trendTitle">
+            Trend (—)
+          </h3>
+
+
+          <div class="stationCardGrid">
+
+
+            <!-- Dry Season -->
+
+            <div class="stationStat">
+
+              <div class="stationStatLabel">
+                Dry season
+              </div>
+
+              <div
+                class="stationStatValue"
+                id="dry"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Wet Season -->
+
+            <div class="stationStat">
+
+              <div class="stationStatLabel">
+                Wet season
+              </div>
+
+              <div
+                class="stationStatValue"
+                id="wet"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Annual -->
+
+            <div class="stationStat stationStatWide">
+
+              <div class="stationStatLabel">
+                Annual
+              </div>
+
+              <div
+                class="stationStatValue"
+                id="annual"
+              >
+                —
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+
+        <!-- ==================================================
+             LAND COVER
+        =================================================== -->
+
+        <div class="card">
+
+          <h3 class="cardTitle">
+            Land cover
+          </h3>
+
+          <div class="smallNote">
+            Percent of subbasin area
+          </div>
+
+
+          <div class="landcoverWrap">
+
+            <canvas
+              id="landcoverChart"
+            ></canvas>
+
+          </div>
+
+
+          <div
+            id="landcoverFallback"
+            class="smallNote"
+            style="display:none;"
+          ></div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           DAM SECTION
+      =================================================== -->
+
+      <div
+        id="damSection"
+        style="display:none;"
+      >
+
+        <div class="card">
+
+          <h3 class="cardTitle">
+            Dam details
+          </h3>
+
+
+          <div class="damHeaderBlock">
+
+            <div
+              class="damNameText"
+              id="damName"
+            >
+              —
+            </div>
+
+            <div
+              class="damSubText"
+              id="damRiverText"
+            >
+              River basin dam
+            </div>
+
+          </div>
+
+
+          <div class="damCardGrid">
+
+
+            <!-- Capacity -->
+
+            <div class="damStat">
+
+              <div class="damStatLabel">
+                Capacity
+              </div>
+
+              <div
+                class="damStatValue"
+                id="damCapacity"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Year -->
+
+            <div class="damStat">
+
+              <div class="damStatLabel">
+                Year
+              </div>
+
+              <div
+                class="damStatValue"
+                id="damYear"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Reservoir -->
+
+            <div class="damStat">
+
+              <div class="damStatLabel">
+                Reservoir
+              </div>
+
+              <div
+                class="damStatValue"
+                id="damVolume"
+              >
+                —
+              </div>
+
+            </div>
+
+
+            <!-- Type -->
+
+            <div class="damStat">
+
+              <div class="damStatLabel">
+                Type
+              </div>
+
+              <div class="damStatValue">
+                Hydropower
+              </div>
+
+            </div>
+
+          </div>
+
+
+          <!-- Capacity Bar -->
+
+          <div class="damBarWrap">
+
+            <div class="damBarLabelRow">
+
+              <span class="damBarLabel">
+                Capacity scale
+              </span>
+
+              <span
+                class="damBarValue"
+                id="damCapacityMini"
+              >
+                —
+              </span>
+
+            </div>
+
+
+            <div class="capacityBar">
+
+              <div
+                class="capacityFill"
+                id="capacityFill"
+              ></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           STATUS
+      =================================================== -->
+
+      <p
+        class="muted"
+        id="statusText"
+      ></p>
+
+    </aside>
+
+
+    <!-- ====================================================
+         MAP
+    ===================================================== -->
+
+    <div class="mapContainer">
+
+      <div id="map"></div>
+
+
+      <!-- ==================================================
+           DAILY STREAMFLOW CHART
+      =================================================== -->
+
+      <div
+        class="bottomChart"
+        id="bottomChart"
+      >
+
+        <div
+          class="resizeHandle"
+          id="resizeHandle"
+          title="Drag to resize"
+        ></div>
+
+
+        <div class="chartHeader">
+
+          <h3 id="chartTitle">
+            Daily Streamflow
+          </h3>
+
+
+          <div class="chartControls">
+
+
+            <!-- Start Year -->
+
+            <label>
+
+              Start year:
+
+              <select
+                id="startYear"
+              ></select>
+
+            </label>
+
+
+            <!-- End Year -->
+
+            <label>
+
+              End year:
+
+              <select
+                id="endYear"
+              ></select>
+
+            </label>
+
+
+            <!-- Lines -->
+
+            <label>
+
+              Lines:
+
+              <select id="lineMode">
+
+                <option value="both">
+                  Both
+                </option>
+
+                <option value="observed">
+                  Observed
+                </option>
+
+                <option value="simulated">
+                  Simulated
+                </option>
+
+              </select>
+
+            </label>
+
+
+            <!-- Close -->
+
+            <button
+              class="chartBtn"
+              id="closeChartBtn"
+              type="button"
+              title="Close chart"
+            >
+              ✕
+            </button>
+
+          </div>
+
+        </div>
+
+
+        <!-- Chart -->
+
+        <canvas
+          id="stationChart"
+        ></canvas>
+
+
+        <p
+          class="muted"
+          id="chartNote"
+        >
+          Click a station to load its chart.
+        </p>
+
+
+        <!-- ==================================================
+             SOURCES
+        =================================================== -->
+
+        <div
+          class="chartSources"
+          id="chartSources"
+        >
+
+          <div class="sourcesTitle">
+            Sources
+          </div>
+
+
+          <div id="sourcesObserved">
+            Observed streamflow: —
+          </div>
+
+
+          <div id="sourcesPrecip">
+            Precipitation: —
+          </div>
+
+
+          <div id="sourcesDam">
+            Dam: —
+          </div>
+
+
+          <div id="sourcesLandcover">
+            Land cover: —
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+
+  <!-- ======================================================
+       SHOW CHART BUTTON
+  ======================================================= -->
+
+  <button
+    class="showChartBtn"
+    id="showChartBtn"
+    type="button"
+    title="Show chart"
+  >
+    Show chart
+  </button>
+
+
+  <!-- ======================================================
+       FORECAST / REFORECAST FLOATING PANEL
+  ======================================================= -->
+
+  <div
+    class="floatingPanel hidden"
+    id="floatingPanel"
+  >
+
+
+    <!-- ====================================================
+         FLOATING PANEL HEADER
+    ===================================================== -->
+
+    <div
+      class="floatingPanelHeader"
+      id="floatingPanelHeader"
+    >
+
+      <div>
+
+        <h3 id="floatingTitle">
+          Forecast
+        </h3>
+
+        <p id="floatingSubtitle">
+          Station analysis
+        </p>
+
+      </div>
+
+
+      <div class="floatingPanelHeaderRight">
+
+
+        <!-- Minimize -->
+
+        <button
+          class="miniBtn"
+          id="minimizePanelBtn"
+          type="button"
+          title="Minimize"
+        >
+          –
+        </button>
+
+
+        <!-- Close -->
+
+        <button
+          class="miniBtn"
+          id="closePanelBtn"
+          type="button"
+          title="Close"
+        >
+          ✕
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- ====================================================
+         FORECAST / REFORECAST TABS
+    ===================================================== -->
+
+    <div class="floatingTabs">
+
+      <button
+        class="floatingTab active"
+        id="tabForecast"
+        type="button"
+      >
+        Forecast
+      </button>
+
+
+      <button
+        class="floatingTab"
+        id="tabArchived"
+        type="button"
+      >
+        Reforecast
+      </button>
+
+    </div>
+
+
+    <!-- ====================================================
+         FLOATING PANEL BODY
+    ===================================================== -->
+
+    <div
+      class="floatingPanelBody"
+      id="floatingPanelBody"
+    >
+
+
+      <!-- ==================================================
+           FORECAST
+      =================================================== -->
+
+      <div id="forecastView">
+
+        <div class="floatingBadgeRow">
+
+          <div class="forecastBadge">
+            Preview only
+          </div>
+
+
+          <div class="forecastSmallNote">
+            Real forecast data can be connected later
+          </div>
+
+        </div>
+
+
+        <div class="floatingChartWrap">
+
+          <canvas
+            id="forecastChart"
+          ></canvas>
+
+        </div>
+
+
+        <div class="floatingChartNote">
+          Dashed line = projected streamflow for upcoming days
+        </div>
+
+      </div>
+
+
+      <!-- ==================================================
+           REFORECAST
+      =================================================== -->
+
+      <div
+        id="archivedView"
+        style="display:none;"
+      >
+
+
+        <!-- YEAR + MONTH CONTROLS -->
+
+        <div class="archivedControls">
+
+
+          <!-- Year -->
+
+          <label>
+
+            Year:
+
+            <select
+              id="archivedYear"
+            ></select>
+
+          </label>
+
+
+          <!-- Month -->
+
+          <label>
+
+            Month:
+
+            <select
+              id="archivedMonth"
+            ></select>
+
+          </label>
+
+        </div>
+
+
+        <!-- SELECTED REFORECAST -->
+
+        <div
+          class="smallNote"
+          id="reforecastSelection"
+          style="margin-top:8px;"
+        >
+          Select a station to view reforecast data.
+        </div>
+
+
+        <!-- REFORECAST CHART -->
+
+        <div class="floatingChartWrap">
+
+          <canvas
+            id="archivedChart"
+          ></canvas>
+
+        </div>
+
+
+        <!-- REFORECAST NOTE -->
+
+        <div
+          class="floatingChartNote"
+          id="reforecastNote"
+        >
+          Shaded area = min–max across Ens1–Ens5 • Solid line = Ens-mean
+        </div>
+
+      </div>
+
+    </div>
+
+
+    <!-- ====================================================
+         FLOATING PANEL RESIZE HANDLE
+    ===================================================== -->
+
+    <div
+      class="floatingResizeHandle"
+      id="floatingResizeHandle"
+      title="Drag to resize"
+    ></div>
+
+  </div>
+
+
+  <!-- ======================================================
+       JAVASCRIPT LIBRARIES
+  ======================================================= -->
+
+
+  <!-- Leaflet -->
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  ></script>
+
+
+  <!-- Chart.js -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/chart.js"
+  ></script>
+
+
+  <!-- SheetJS -->
+  <!-- Required to read the reforecast XLSX workbook -->
+
+  <script
+    src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"
+  ></script>
+
+
+  <!-- ======================================================
+       MAIN APPLICATION
+
+       IMPORTANT:
+       type="module" is required because app.js imports
+       the JavaScript files inside the js/ folder.
+  ======================================================= -->
+
+  <script
+    type="module"
+    src="app.js"
+  ></script>
+
+</body>
+</html>
